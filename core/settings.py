@@ -4,6 +4,10 @@ from pydantic_settings import BaseSettings
 load_dotenv()
 
 
+class Settings(BaseSettings):
+    BOT_TOKEN: str
+
+
 class Postgres(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: int = "5432"
@@ -15,4 +19,6 @@ class Postgres(BaseSettings):
     def database_url_asyncpg(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
+
 db_settings = Postgres()
+bot_settings = Settings()

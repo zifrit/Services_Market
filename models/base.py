@@ -5,7 +5,10 @@ from sqlalchemy import DateTime, func
 
 class Base(DeclarativeBase):
     __abstract__ = True
-    id: Mapped[int] = mapped_column(primary_key=True)
+
+
+class CUDMixin(Base):
+    __abstract__ = True
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -18,3 +21,12 @@ class Base(DeclarativeBase):
         onupdate=datetime.now(timezone.utc),
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class IdMixin(Base):
+    __abstract__ = True
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+
+class IdCUDMixin(CUDMixin, IdMixin):
+    __abstract__ = True

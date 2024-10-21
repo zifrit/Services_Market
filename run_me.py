@@ -10,6 +10,7 @@ from core.settings import bot_settings
 from core.logger import LOGGING
 from handlers import (
     start,
+    buy_vpn,
 )
 
 commands = [
@@ -25,6 +26,7 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_routers(
         start.router,
+        buy_vpn.router,
     )
     await bot.set_my_commands(commands=commands)
     await bot.delete_webhook(drop_pending_updates=True)

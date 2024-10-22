@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from core.db_connections import db_helper
 import logging
-from buttons.start import (
+from buttons.buy_vpn import (
     buy_vpn_inline_buttons,
     choice_county_inline_buttons,
     choice_tariff_inline_buttons,

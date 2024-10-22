@@ -10,6 +10,7 @@ from buttons.buy_vpn import (
 )
 from utils.countries import countries
 from utils.price_list import price_list
+from crud import vpn
 
 loger = logging.getLogger(__name__)
 
@@ -76,6 +77,13 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 )
 async def choice_county(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    async with db_helper.session_factory() as session:
+        await vpn.create_vpn(
+            session=session,
+            price=price_list[call.data],
+            country=data["country"],
+            tg_id=call.from_user.id,
+        )
     await call.message.edit_text(
         text=f"""
 Ваш заказ:

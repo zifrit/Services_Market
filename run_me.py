@@ -11,6 +11,7 @@ from core.logger import LOGGING
 from handlers import (
     start,
     buy_vpn,
+    account,
 )
 
 commands = [
@@ -27,6 +28,7 @@ async def main():
     dp.include_routers(
         start.router,
         buy_vpn.router,
+        account.router,
     )
     await bot.set_my_commands(commands=commands)
     await bot.delete_webhook(drop_pending_updates=True)

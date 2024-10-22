@@ -8,9 +8,9 @@ if typing.TYPE_CHECKING:
     from models.user import User
 
 
-class VPN(IdCUDMixin):
-    __tablename__ = "vpn"
+class UserVPN(IdCUDMixin):
+    __tablename__ = "user_vpn"
     price: Mapped[str] = mapped_column(String(255))
     country: Mapped[str] = mapped_column(String(255))
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.tg_id"))
-    tg_user: Mapped["User"] = relationship(back_populates="vpn")
+    tg_user: Mapped["User"] = relationship(back_populates="user_vpn")

@@ -1,9 +1,9 @@
 __all__ = (
     "Base",
     "User",
-    "VPN",
+    "UserVPN",
 )
 
 from .base import Base
 from .user import User
-from .vpn import VPN
+from .vpn import UserVPN

@@ -41,7 +41,7 @@ async def user_account(call: CallbackQuery):
 async def user_vpn(call: CallbackQuery):
     async with db_helper.session_factory() as session:
         vpn, count_count = await crud_vpn.get_user_vpn(
-            session=session, tg_user_id=call.from_user.id, limit=2
+            session=session, tg_id=call.from_user.id, limit=2
         )
         count_page = count_count // 2 + 1 if count_count % 2 != 0 else count_count // 2
         list_data = []
@@ -52,7 +52,7 @@ async def user_vpn(call: CallbackQuery):
                     "callback_data": f"{data.id}_{data.tg_user_id}",
                 }
             )
-        if 0 < count_count <= 2:
+        if count_count <= 2:
             await call.message.edit_text(
                 text="some text",
                 reply_markup=vpn_pagination(

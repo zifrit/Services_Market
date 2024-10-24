@@ -25,6 +25,7 @@ class User(IdCUDMixin):
         back_populates="referred_user",
         foreign_keys="[Referral.referred_user_id]",
     )
+    balance: Mapped[int] = mapped_column(default=0, server_default="0")
 
     def __str__(self) -> str:
         return f"{self.tg_id} {self.username}"

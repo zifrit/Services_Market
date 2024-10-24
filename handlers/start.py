@@ -18,7 +18,7 @@ router = Router()
 @router.message(CommandStart())
 async def start_handler(message: Message, command: CommandObject):
     async with db_helper.session_factory() as session:
-        if command.args:
+        if command.args is not None:
             if message.from_user.id != int(decode_payload(command.args)):
                 status = await create_referral(
                     session=session,

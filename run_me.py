@@ -12,6 +12,7 @@ from handlers import (
     start,
     buy_vpn,
     account,
+    referral,
 )
 
 commands = [
@@ -29,6 +30,7 @@ async def main():
         start.router,
         buy_vpn.router,
         account.router,
+        referral.router,
     )
     await bot.set_my_commands(commands=commands)
     await bot.delete_webhook(drop_pending_updates=True)

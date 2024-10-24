@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 start_inline_button = InlineKeyboardMarkup(
     inline_keyboard=[
@@ -54,3 +54,14 @@ start_inline_button = InlineKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True,
 )
+
+
+def back(back_text: str, back_callback_data: str):
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text=back_text,
+            callback_data=back_callback_data,
+        )
+    )
+    return builder.as_markup()

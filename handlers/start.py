@@ -1,10 +1,13 @@
 from aiogram import F, Router
+from aiogram.filters import CommandStart, CommandObject
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.deep_linking import decode_payload
 from aiogram.types import Message, CallbackQuery
 from core.db_connections import db_helper
 import logging
 from crud import user
 from buttons import start
+from crud.referral import create_referral
 
 loger = logging.getLogger(__name__)
 
@@ -12,9 +15,25 @@ loger = logging.getLogger(__name__)
 router = Router()
 
 
-@router.message(F.text == "/start")
-async def start_handler(message: Message):
+@router.message(CommandStart())
+async def start_handler(message: Message, command: CommandObject):
     async with db_helper.session_factory() as session:
+        if command.args:
+            if message.from_user.id != int(decode_payload(command.args)):
+                status = await create_referral(
+                    session=session,
+                    referrer_tg_id=message.from_user.id,
+                    referred_tg_id=int(decode_payload(command.args)),
+                )
+                if status:
+                    await message.answer(
+                        "Рефиралка принята",
+                    )
+                else:
+                    await message.answer(
+                        "Уже есть рефиралка",
+                    )
+
         if not await user.get_user(session, message.from_user.id):
             await user.create_users(
                 session,

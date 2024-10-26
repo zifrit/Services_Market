@@ -13,6 +13,8 @@ class UserVPN(IdCUDMixin):
     __tablename__ = "user_vpn"
     price: Mapped[str] = mapped_column(String(255))
     country: Mapped[str] = mapped_column(String(255))
+    key_country: Mapped[str] = mapped_column(String(255))
+    key_price: Mapped[str] = mapped_column(String(255))
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     tg_user: Mapped["User"] = relationship(back_populates="user_vpn")
 
@@ -26,7 +28,7 @@ class UserVPN(IdCUDMixin):
 class VPN(IdCUDMixin):
     __tablename__ = "vpn"
     country_view_text: Mapped[str] = mapped_column(String(255))
-    country: Mapped[str] = mapped_column(String(255))
+    key_country: Mapped[str] = mapped_column(String(255))
     price: Mapped[list["Price"]] = relationship(
         secondary="association_vpn_price",
         back_populates="vpn",

@@ -1,8 +1,8 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.orm import selectinload
 from models import User
-from models.vpn import UserVPN
+from models.vpn import UserVPN, VPN, Price
 from crud.user import get_user
 
 
@@ -19,7 +19,7 @@ async def create_vpn(
     return vpn
 
 
-async def get_vpn(session: AsyncSession, _id: int) -> UserVPN:
+async def get_user_vpn(session: AsyncSession, _id: int) -> UserVPN:
     vpn = await session.scalar(select(UserVPN).where(UserVPN.id == _id))
     return vpn
 
@@ -48,3 +48,22 @@ async def get_user_vpn(
         .where(UserVPN.tg_user_id == user.id)
     )
     return list(vpn), await count_get_user_vpn(session, user)
+
+
+async def get_vpn_s(session: AsyncSession) -> list[VPN]:
+    vpn_s = await session.scalars(select(VPN))
+    return list(vpn_s)
+
+
+async def get_vpn(session: AsyncSession, _id: int) -> VPN:
+    vpn = await session.scalar(select(VPN).where(VPN.id == _id))
+    return vpn
+
+
+async def get_vpn_price(session: AsyncSession, key_county: str) -> list[Price]:
+    vpn_s = await session.scalar(
+        select(VPN)
+        .options(selectinload(VPN.prices))
+        .where(VPN.key_country == key_county)
+    )
+    return vpn_s.prices

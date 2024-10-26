@@ -1,6 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from utils.countries import countries
+
 buy_vpn_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -47,6 +49,25 @@ choice_county_inline_buttons = InlineKeyboardMarkup(
     ]
 )
 
+
+def choice_county_inline_buttons_builder(countries: list[dict]):
+    builder = InlineKeyboardBuilder()
+    for county in countries:
+        builder.row(
+            InlineKeyboardButton(
+                text=county["back_text"],
+                callback_data=county["back_callback_data"],
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(
+            text="🔙 Назад",
+            callback_data="back_to_buy_vpn",
+        )
+    )
+    return builder.as_markup()
+
+
 choice_tariff_inline_buttons = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -73,6 +94,24 @@ choice_tariff_inline_buttons = InlineKeyboardMarkup(
         ],
     ]
 )
+
+
+def choice_tariff_inline_buttons_builder(prices: list[dict]):
+    builder = InlineKeyboardBuilder()
+    for price in prices:
+        builder.row(
+            InlineKeyboardButton(
+                text=price["back_text"],
+                callback_data=price["back_callback_data"],
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(
+            text="🔙 Назад",
+            callback_data="back_to_choice_county",
+        )
+    )
+    return builder.as_markup()
 
 
 def list_user_vpn_inline_buttons(

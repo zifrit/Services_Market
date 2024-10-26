@@ -5,12 +5,13 @@ from core.db_connections import db_helper
 import logging
 from buttons.buy_vpn import (
     buy_vpn_inline_buttons,
-    choice_county_inline_buttons,
+    choice_county_inline_buttons_builder,
     choice_tariff_inline_buttons,
 )
 from utils.countries import countries
 from utils.price_list import price_list
-from crud import vpn
+from schematics.vpn import CountryButtons
+from crud import vpn as vpn_crud
 
 loger = logging.getLogger(__name__)
 
@@ -32,25 +33,23 @@ async def buy_vpn(call: CallbackQuery):
 
 @router.callback_query(F.data.in_(["choice_county", "back_to_choice_county"]))
 async def choice_county(call: CallbackQuery):
+    async with db_helper.session_factory() as session:
+        vpn_s = await vpn_crud.get_vpn_s(session)
+        vpn_data_list = [
+            {"back_text": vpn.country_view_text, "back_callback_data": vpn.key_country}
+            for vpn in vpn_s
+        ]
     await call.message.edit_text(
         text="""
 Выберите страну для вашего VPN ⬇️\n
 ⚠️ Если вам нужен VPN для соцсетей или торрентов – вернитесь назад и выберите цель использования. Ни в коем случае не используйте просто страновой VPN для скачивания с торрентов!\n
 ⛔️ Выбирая страну самостоятельно, мы НЕ гарантируем что ваш инстаграм будет работать в России с российского IP 😄
         """,
-        reply_markup=choice_county_inline_buttons,
+        reply_markup=choice_county_inline_buttons_builder(countries=vpn_data_list),
     )
 
 
-@router.callback_query(
-    F.data.in_(
-        [
-            "germany_county",
-            "france_county",
-            "netherlands_county",
-        ]
-    )
-)
+@router.callback_query(F.data.startswith("county_"))
 async def choice_county(call: CallbackQuery, state: FSMContext):
     await state.update_data(country=countries[call.data])
     await call.message.edit_text(
@@ -78,7 +77,7 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 async def choice_county(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     async with db_helper.session_factory() as session:
-        await vpn.create_vpn(
+        await vpn_crud.create_vpn(
             session=session,
             price=price_list[call.data],
             country=data["country"],

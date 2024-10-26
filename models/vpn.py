@@ -34,6 +34,12 @@ class VPN(IdCUDMixin):
         back_populates="vpn",
     )
 
+    def __str__(self) -> str:
+        return f"{self.country_view_text}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class Term(enum.Enum):
     day = "day"
@@ -50,13 +56,19 @@ class Price(IdCUDMixin):
         PGEnum(Term, name="price_term"),
         comment="Вид времени",
     )
-    key_price: Mapped[str] = mapped_column(
+    key_price: Mapped[str | None] = mapped_column(
         String(255), comment="Ключ для цены", unique=True
     )
     vpn: Mapped[list["VPN"]] = relationship(
         secondary="association_vpn_price",
         back_populates="price",
     )
+
+    def __str__(self) -> str:
+        return f"{self.price_view_text} {self.quantity} {self.term}"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class AssociationVPNPrice(IdCUDMixin):

@@ -29,8 +29,7 @@ class VPN(IdCUDMixin):
     __tablename__ = "vpn"
     country_view_text: Mapped[str] = mapped_column(String(255))
     key_country: Mapped[str] = mapped_column(String(255))
-    price: Mapped[list["Price"]] = relationship(
-        secondary="association_vpn_price",
+    prices: Mapped[list["Price"]] = relationship(
         back_populates="vpn",
     )
 
@@ -59,10 +58,8 @@ class Price(IdCUDMixin):
     key_price: Mapped[str | None] = mapped_column(
         String(255), comment="Ключ для цены", unique=True
     )
-    vpn: Mapped[list["VPN"]] = relationship(
-        secondary="association_vpn_price",
-        back_populates="price",
-    )
+    vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
+    vpn: Mapped["VPN"] = relationship(back_populates="prices")
 
     def __str__(self) -> str:
         return f"{self.price_view_text} {self.quantity} {self.term}"
@@ -71,13 +68,13 @@ class Price(IdCUDMixin):
         return str(self)
 
 
-class AssociationVPNPrice(IdCUDMixin):
-    __tablename__ = "association_vpn_price"
-    __table_args__ = (
-        UniqueConstraint("vpn_id", "price_id", name="idx_unique_order_product"),
-    )
-    vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
-    price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
+# class AssociationVPNPrice(IdCUDMixin):
+#     __tablename__ = "association_vpn_price"
+#     __table_args__ = (
+#         UniqueConstraint("vpn_id", "price_id", name="idx_unique_order_product"),
+#     )
+#     vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
+#     price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
 
-    # vpn: Mapped["VPN"] = relationship(back_populates="price")
-    # price: Mapped["Price"] = relationship(back_populates="vpn")
+# vpn: Mapped["VPN"] = relationship(back_populates="price")
+# price: Mapped["Price"] = relationship(back_populates="vpn")

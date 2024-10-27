@@ -9,9 +9,20 @@ if typing.TYPE_CHECKING:
     from models.user import User
 
 
+class StatusUserVPN(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+    pause = "pause"
+
+
 class UserVPN(IdCUDMixin):
     __tablename__ = "user_vpn"
     view: Mapped[str] = mapped_column(String(255))
+    status: Mapped[StatusUserVPN] = mapped_column(
+        PGEnum(StatusUserVPN, name="status_user_vpn"),
+        comment="Состояние купленного впн",
+        default=StatusUserVPN.inactive,
+    )
     price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
     price: Mapped["Price"] = relationship(back_populates="user_vpn_s")
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

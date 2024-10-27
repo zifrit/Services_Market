@@ -18,6 +18,12 @@ router = Router()
 @router.message(CommandStart())
 async def start_handler(message: Message, command: CommandObject):
     async with db_helper.session_factory() as session:
+        if not await user.get_user(session, message.from_user.id):
+            await user.create_users(
+                session,
+                message.from_user.username,
+                message.from_user.id,
+            )
         if command.args is not None:
             if message.from_user.id != int(decode_payload(command.args)):
                 status = await create_referral(
@@ -33,13 +39,6 @@ async def start_handler(message: Message, command: CommandObject):
                     await message.answer(
                         "Уже есть рефиралка",
                     )
-
-        if not await user.get_user(session, message.from_user.id):
-            await user.create_users(
-                session,
-                message.from_user.username,
-                message.from_user.id,
-            )
     await message.answer(
         """
 🔥 Наши серверы не имеют ограничений по скорости и трафику, VPN работает на всех устройствах, YouTube в 4К – без задержек!\n

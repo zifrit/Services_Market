@@ -40,7 +40,7 @@ async def user_account(call: CallbackQuery):
 )
 async def user_vpn(call: CallbackQuery):
     async with db_helper.session_factory() as session:
-        vpn, count_count = await crud_vpn.get_user_vpn(
+        vpn, count_count = await crud_vpn.get_user_vpn_s(
             session=session, tg_id=call.from_user.id, limit=2
         )
         count_page = count_count // 2 + 1 if count_count % 2 != 0 else count_count // 2
@@ -48,7 +48,7 @@ async def user_vpn(call: CallbackQuery):
         for data in vpn:
             list_data.append(
                 {
-                    "text": f"{data.country} {data.price}",
+                    "text": f"{data.view}",
                     "callback_data": f"{data.id}_{data.tg_user_id}",
                 }
             )
@@ -101,9 +101,9 @@ async def paginator_service(call: CallbackQuery, callback_data: Pagination):
             right = None
 
     async with db_helper.session_factory() as session:
-        vpn, count_count = await crud_vpn.get_user_vpn(
+        vpn, count_count = await crud_vpn.get_user_vpn_s(
             session=session,
-            tg_user_id=call.from_user.id,
+            tg_id=call.from_user.id,
             limit=2,
             offset=page,
         )
@@ -112,7 +112,7 @@ async def paginator_service(call: CallbackQuery, callback_data: Pagination):
         for data in vpn:
             list_data.append(
                 {
-                    "text": f"{data.country} {data.price}",
+                    "text": f"{data.view}",
                     "callback_data": f"{data.id}_{data.tg_user_id}",
                 }
             )

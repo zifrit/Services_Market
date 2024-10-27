@@ -5,15 +5,26 @@ from models import User
 from models.vpn import UserVPN, VPN, Price
 from crud.user import get_user
 
+term = {
+    "day": "день",
+    "month": "месяц",
+    "year": "год",
+}
 
-async def create_vpn(
+
+async def create_user_vpn(
     session: AsyncSession,
-    price: str,
-    country: str,
+    key_price: str,
     tg_id: int,
 ) -> UserVPN:
     user = await get_user(session, tg_id)
-    vpn = UserVPN(price=price, country=country, tg_user_id=user.id)
+    price = await get_price_by_key_price(session, key_price)
+    country = await get_vpn_by_id(session, price.vpn_id)
+    vpn = UserVPN(
+        price_id=price.id,
+        tg_user_id=user.id,
+        view=f"{country.country_view_text} {price.price_view_text} {price.quantity} {term.get(price.term.value)}",
+    )
     session.add(vpn)
     await session.commit()
     return vpn
@@ -34,7 +45,7 @@ async def count_get_user_vpn(
     return count_vpn
 
 
-async def get_user_vpn(
+async def get_user_vpn_s(
     session: AsyncSession,
     tg_id: int,
     limit: int = 5,  # page size
@@ -55,15 +66,24 @@ async def get_vpn_s(session: AsyncSession) -> list[VPN]:
     return list(vpn_s)
 
 
-async def get_vpn(session: AsyncSession, _id: int) -> VPN:
+async def get_vpn_by_id(session: AsyncSession, _id: int) -> VPN:
     vpn = await session.scalar(select(VPN).where(VPN.id == _id))
     return vpn
 
 
-async def get_vpn_price(session: AsyncSession, key_county: str) -> list[Price]:
-    vpn_s = await session.scalar(
-        select(VPN)
-        .options(selectinload(VPN.prices))
-        .where(VPN.key_country == key_county)
-    )
-    return vpn_s.prices
+async def get_vpn_key_country(session: AsyncSession, key_country: str) -> VPN:
+    vpn = await session.scalar(select(VPN).where(VPN.key_country == key_country))
+    return vpn
+
+
+async def get_price_by_key_price(session: AsyncSession, key_price: str) -> Price:
+    price = await session.scalar(select(Price).where(Price.key_price == key_price))
+    return price
+
+
+async def get_vpn_prices(
+    session: AsyncSession, key_county: str
+) -> tuple[list[Price], str]:
+    vpn = await get_vpn_key_country(session, key_county)
+    prices = await session.scalars(select(Price).where(Price.vpn_id == vpn.id))
+    return list(prices), vpn.country_view_text

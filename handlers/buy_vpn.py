@@ -1,16 +1,15 @@
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
+
+from buttons.start import back
 from core.db_connections import db_helper
 import logging
 from buttons.buy_vpn import (
     buy_vpn_inline_buttons,
     choice_county_inline_buttons_builder,
-    choice_tariff_inline_buttons,
+    choice_tariff_inline_buttons_builder,
 )
-from utils.countries import countries
-from utils.price_list import price_list
-from schematics.vpn import CountryButtons
 from crud import vpn as vpn_crud
 
 loger = logging.getLogger(__name__)
@@ -49,38 +48,40 @@ async def choice_county(call: CallbackQuery):
     )
 
 
-@router.callback_query(F.data.startswith("county_"))
+@router.callback_query(F.data.startswith("country_"))
 async def choice_county(call: CallbackQuery, state: FSMContext):
-    await state.update_data(country=countries[call.data])
+    async with db_helper.session_factory() as session:
+        price_list, text = await vpn_crud.get_vpn_prices(session, call.data)
+        data_price_list = [
+            {
+                "back_text": f"🎟️{price.price_view_text}",
+                "back_callback_data": f"tariff-{price.key_price}",
+            }
+            for price in price_list
+        ]
+        await state.update_data(country=text)
     await call.message.edit_text(
         text=f"""
-{countries[call.data]}
+{text}
 💰 Лучший VPN по лучшей цене!
 
 ├ 1 мес: 100₽
 ├ 3 мес: 270₽
 ├ 6 год: 500₽
         """,
-        reply_markup=choice_tariff_inline_buttons,
+        reply_markup=choice_tariff_inline_buttons_builder(prices=data_price_list),
     )
 
 
-@router.callback_query(
-    F.data.in_(
-        [
-            "1_moth_tariff",
-            "3_moth_tariff",
-            "6_moth_tariff",
-        ]
-    )
-)
+@router.callback_query(F.data.startswith("tariff-"))
 async def choice_county(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    key_price = call.data.split("-")[1]
     async with db_helper.session_factory() as session:
-        await vpn_crud.create_vpn(
+        price = await vpn_crud.get_price_by_key_price(session, key_price)
+        await vpn_crud.create_user_vpn(
             session=session,
-            price=price_list[call.data],
-            country=data["country"],
+            key_price=key_price,
             tg_id=call.from_user.id,
         )
     await call.message.edit_text(
@@ -88,7 +89,8 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 Ваш заказ:
 
 Страна - {data['country']}
-Цена - {price_list[call.data]}
+Цена - {price.price_view_text}
 Была успешна принята.
         """,
+        reply_markup=back(back_text="🔙Назад", back_callback_data="back_to_start_menu"),
     )

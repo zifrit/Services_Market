@@ -12,7 +12,7 @@ if typing.TYPE_CHECKING:
 class UserVPN(IdCUDMixin):
     __tablename__ = "user_vpn"
     view: Mapped[str] = mapped_column(String(255))
-    price_id: Mapped[str] = mapped_column(ForeignKey("price.id"))
+    price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
     price: Mapped["Price"] = relationship(back_populates="user_vpn_s")
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     tg_user: Mapped["User"] = relationship(back_populates="user_vpn")
@@ -59,6 +59,7 @@ class Price(IdCUDMixin):
     )
     vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
     vpn: Mapped["VPN"] = relationship(back_populates="prices")
+    user_vpn_s: Mapped["UserVPN"] = relationship(back_populates="price")
 
     def __str__(self) -> str:
         return f"{self.price_view_text} {self.quantity} {self.term}"

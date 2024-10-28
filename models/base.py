@@ -1,10 +1,22 @@
 from datetime import datetime, timezone
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, func
+import logging
+
+
+log = logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):
     __abstract__ = True
+
+    repr_columns = ["id"]
+
+    def __repr__(self) -> str:
+        cols = []
+        for col in self.repr_columns:
+            cols.append(f"{col}={getattr(self, col)}")
+        return " ".join(cols)
 
 
 class CUDMixin(Base):

@@ -28,11 +28,7 @@ class UserVPN(IdCUDMixin):
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     tg_user: Mapped["User"] = relationship(back_populates="user_vpn")
 
-    def __str__(self) -> str:
-        return f"{self.view}"
-
-    def __repr__(self) -> str:
-        return str(self)
+    repr_columns = ["id", "view"]
 
 
 class VPN(IdCUDMixin):
@@ -43,11 +39,7 @@ class VPN(IdCUDMixin):
         back_populates="vpn",
     )
 
-    def __str__(self) -> str:
-        return f"{self.country_view_text}"
-
-    def __repr__(self) -> str:
-        return str(self)
+    repr_columns = ["id", "country_view_text"]
 
 
 class Term(enum.Enum):
@@ -72,11 +64,7 @@ class Price(IdCUDMixin):
     vpn: Mapped["VPN"] = relationship(back_populates="prices")
     user_vpn_s: Mapped["UserVPN"] = relationship(back_populates="price")
 
-    def __str__(self) -> str:
-        return f"{self.price_view_text} {self.quantity} {self.term}"
-
-    def __repr__(self) -> str:
-        return str(self)
+    repr_columns = ["id", "price_view_text", "quantity", "term"]
 
 
 # class AssociationVPNPrice(IdCUDMixin):

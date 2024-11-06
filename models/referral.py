@@ -8,13 +8,13 @@ if typing.TYPE_CHECKING:
 
 
 class Referral(IdCUDMixin):
-    __tablename__ = "referral"
+    __tablename__ = "referrals"
     # Реферал, который пригласил данный пользователь
     # Тот кого пригласили
-    referrer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    referrer_id: Mapped[int] = mapped_column(ForeignKey("tg_users.id"))
     # Пользователь, который пригласил текущего пользователя
     # Тот кто пригласил
-    referred_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    referred_user_id: Mapped[int] = mapped_column(ForeignKey("tg_users.id"))
 
     referrer: Mapped["User"] = relationship(
         back_populates="referred_users",

@@ -1,11 +1,7 @@
-__all__ = (
-    "Base",
-    "User",
-    "UserVPN",
-    "Referral",
-)
+__all__ = "*"
 
 from .base import Base
-from .user import User
-from .vpn import UserVPN
+from .user import TgUser
+from .vpn import VPNs, Country, Price
+from .order import Order, Payment
 from .referral import Referral

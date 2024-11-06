@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+from enum import EnumType
+
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import DateTime, func
 import logging
@@ -15,7 +17,10 @@ class Base(DeclarativeBase):
     def __repr__(self) -> str:
         cols = []
         for col in self.repr_columns:
-            cols.append(f"{col}={getattr(self, col)}")
+            if isinstance(getattr(self, col), EnumType):
+                cols.append(f"{col}={getattr(self, col).value}")
+            else:
+                cols.append(f"{col}={getattr(self, col)}")
         return " ".join(cols)
 
 

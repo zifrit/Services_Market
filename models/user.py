@@ -4,15 +4,16 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String, BigInteger
 
 if typing.TYPE_CHECKING:
-    from models.vpn import UserVPN
+    from models.vpn import VPNs
     from models.referral import Referral
+    from models.order import Order
 
 
-class User(IdCUDMixin):
-    __tablename__ = "users"
+class TgUser(IdCUDMixin):
+    __tablename__ = "tg_users"
     username: Mapped[str] = mapped_column(String(255))
     tg_id: Mapped[int] = mapped_column(BigInteger, unique=True)
-    user_vpn: Mapped[list["UserVPN"]] = relationship(back_populates="tg_user")
+    user_vpn_s: Mapped[list["VPNs"]] = relationship(back_populates="tg_user")
     # Рефералы, которых пригласил данный пользователь
     referred_users: Mapped[list["Referral"]] = relationship(
         "Referral",
@@ -25,10 +26,6 @@ class User(IdCUDMixin):
         back_populates="referred_user",
         foreign_keys="[Referral.referred_user_id]",
     )
-    balance: Mapped[int] = mapped_column(default=0, server_default="0")
+    orders: Mapped[list["Order"]] = relationship(back_populates="tg_user")
 
-    def __str__(self) -> str:
-        return f"{self.tg_id} {self.username}"
-
-    def __repr__(self) -> str:
-        return str(self)
+    repr_columns = ["tg_id", "username"]

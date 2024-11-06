@@ -1,79 +1,77 @@
 import typing
 import enum
+from datetime import datetime
 from models.base import IdCUDMixin
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, ForeignKey, UniqueConstraint, Integer
+from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import ENUM as PGEnum
 
 if typing.TYPE_CHECKING:
-    from models.user import User
+    from models.user import TgUser
+    from models.order import Order
 
 
-class StatusUserVPN(enum.Enum):
+class TypeVPN(enum.Enum):
     active = "active"
     inactive = "inactive"
-    pause = "pause"
 
 
-class UserVPN(IdCUDMixin):
-    __tablename__ = "user_vpn"
-    view: Mapped[str] = mapped_column(String(255))
-    status: Mapped[StatusUserVPN] = mapped_column(
-        PGEnum(StatusUserVPN, name="status_user_vpn"),
+class VPNs(IdCUDMixin):
+    __tablename__ = "vpn_s"
+    vpn_key: Mapped[str] = mapped_column(String(255))
+    type_VPN: Mapped[TypeVPN] = mapped_column(
+        PGEnum(TypeVPN, name="status_user_vpn"),
         comment="Состояние купленного впн",
-        default=StatusUserVPN.inactive,
     )
-    price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
-    price: Mapped["Price"] = relationship(back_populates="user_vpn_s")
-    tg_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    tg_user: Mapped["User"] = relationship(back_populates="user_vpn")
+    expire: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    tg_user_id: Mapped[int] = mapped_column(ForeignKey("tg_users.id"))
+    tg_user: Mapped["TgUser"] = relationship(back_populates="user_vpn_s")
 
-    repr_columns = ["id", "view"]
+    repr_columns = ["id", "vpn_key"]
 
 
-class VPN(IdCUDMixin):
-    __tablename__ = "vpn"
-    country_view_text: Mapped[str] = mapped_column(String(255))
+class Country(IdCUDMixin):
+    __tablename__ = "countries"
+    view_country: Mapped[str] = mapped_column(String(255))
     key_country: Mapped[str] = mapped_column(String(255), unique=True)
     prices: Mapped[list["Price"]] = relationship(
-        back_populates="vpn",
+        back_populates="country",
     )
 
-    repr_columns = ["id", "country_view_text"]
+    repr_columns = ["id", "view_country"]
 
 
-class Term(enum.Enum):
+class BillingPeriod(enum.Enum):
     day = "day"
     month = "month"
     year = "year"
 
 
+class Currency(enum.Enum):
+    dollars = "dollars"
+    euro = "euro"
+    ruble = "ruble"
+
+
 class Price(IdCUDMixin):
-    __tablename__ = "price"
-    price_view_text: Mapped[str] = mapped_column(String(255))
-    price: Mapped[int]
-    quantity: Mapped[int]
-    term: Mapped[Term] = mapped_column(
-        PGEnum(Term, name="price_term"),
-        comment="Вид времени",
+    __tablename__ = "prices"
+    view_price: Mapped[str] = mapped_column(String(255))
+    term: Mapped[int] = mapped_column(comment="Количество времени")
+    billing_period: Mapped[BillingPeriod] = mapped_column(
+        PGEnum(BillingPeriod, name="billing_period"),
+        comment="Период времени",
     )
-    key_price: Mapped[str | None] = mapped_column(
+    price: Mapped[int] = mapped_column(comment="Цена")
+    currency: Mapped[Currency] = mapped_column(
+        PGEnum(Currency, name="price_currency"),
+        comment="Валюта",
+    )
+    price_key: Mapped[str | None] = mapped_column(
         String(255), comment="Ключ для цены", unique=True
     )
-    vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
-    vpn: Mapped["VPN"] = relationship(back_populates="prices")
-    user_vpn_s: Mapped["UserVPN"] = relationship(back_populates="price")
+    country_id: Mapped[int] = mapped_column(ForeignKey("countries.id"))
+    is_active: Mapped[bool] = mapped_column(comment="Статус цены")
+    country: Mapped["Country"] = relationship(back_populates="prices")
+    orders: Mapped[list["Order"]] = relationship(back_populates="price")
 
-    repr_columns = ["id", "price_view_text", "quantity", "term"]
-
-
-# class AssociationVPNPrice(IdCUDMixin):
-#     __tablename__ = "association_vpn_price"
-#     __table_args__ = (
-#         UniqueConstraint("vpn_id", "price_id", name="idx_unique_order_product"),
-#     )
-#     vpn_id: Mapped[int] = mapped_column(ForeignKey("vpn.id"))
-#     price_id: Mapped[int] = mapped_column(ForeignKey("price.id"))
-
-# vpn: Mapped["VPN"] = relationship(back_populates="price")
-# price: Mapped["Price"] = relationship(back_populates="vpn")
+    repr_columns = ["id", "view_price", "quantity", ""]

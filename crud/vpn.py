@@ -9,11 +9,6 @@ from schematics.vpn import (
     ShowPricesSchema,
 )
 
-term = {
-    "day": "день",
-    "month": "месяц",
-    "year": "год",
-}
 
 
 async def create_vpn_s(session: AsyncSession, user_vpn: CreateUserVPNsSchema) -> None:
@@ -42,3 +37,8 @@ async def get_vpn_country_price(
     return [
         ShowPricesSchema.model_validate(price) for price in prices
     ], country.view_country
+
+
+async def get_price_id_by_price_key(session: AsyncSession, price_key: str) -> int:
+    price = await session.scalar(select(Price.id).where(Price.price_key == price_key))
+    return price

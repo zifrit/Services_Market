@@ -40,5 +40,11 @@ class BasePricesSchema(BaseSchema):
     is_active: bool
 
 
+class ShortShowPriceSchema(BaseSchema):
+    view_price: str
+    term: int
+    billing_period: BillingPeriod
+
+
 class ShowPricesSchema(BasePricesSchema):
     pass

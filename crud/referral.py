@@ -3,7 +3,6 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User
 from models.referral import Referral
 from crud.user import get_user
 

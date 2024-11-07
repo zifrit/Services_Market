@@ -10,7 +10,8 @@ from buttons.buy_vpn import (
     choice_county_inline_buttons_builder,
     choice_tariff_inline_buttons_builder,
 )
-from crud import vpn as vpn_crud
+from crud import vpn as vpn_crud, order as order_crud, user as user_crud
+from schematics.order import CreateOrderSchema
 
 loger = logging.getLogger(__name__)
 
@@ -33,9 +34,9 @@ async def buy_vpn(call: CallbackQuery):
 @router.callback_query(F.data.in_(["choice_county", "back_to_choice_county"]))
 async def choice_county(call: CallbackQuery):
     async with db_helper.session_factory() as session:
-        vpn_s = await vpn_crud.get_vpn_s(session)
+        vpn_s = await vpn_crud.get_vpn_countries(session)
         vpn_data_list = [
-            {"back_text": vpn.country_view_text, "back_callback_data": vpn.key_country}
+            {"back_text": vpn.view_country, "back_callback_data": vpn.key_country}
             for vpn in vpn_s
         ]
     await call.message.edit_text(
@@ -48,14 +49,14 @@ async def choice_county(call: CallbackQuery):
     )
 
 
-@router.callback_query(F.data.startswith("country_"))
+@router.callback_query(F.data.startswith("country-"))
 async def choice_county(call: CallbackQuery, state: FSMContext):
     async with db_helper.session_factory() as session:
-        price_list, text = await vpn_crud.get_vpn_prices(session, call.data)
+        price_list, text = await vpn_crud.get_vpn_country_price(session, call.data)
         data_price_list = [
             {
-                "back_text": f"🎟️{price.price_view_text}",
-                "back_callback_data": f"tariff-{price.key_price}",
+                "back_text": f"🎟️{price.view_price}",
+                "back_callback_data": f"{price.price_key}",
             }
             for price in price_list
         ]
@@ -76,21 +77,25 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("tariff-"))
 async def choice_county(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    key_price = call.data.split("-")[1]
+    key_price = call.data
     async with db_helper.session_factory() as session:
-        price = await vpn_crud.get_price_by_key_price(session, key_price)
-        await vpn_crud.create_user_vpn(
+        price_id = await vpn_crud.get_price_id_by_price_key(session, key_price)
+        tg_user_id = await user_crud.get_tg_user_id(session, tg_id=call.from_user.id)
+        order_schema = CreateOrderSchema(
+            price_id=price_id, tg_user_id=tg_user_id, status=True
+        )
+        order = await order_crud.create_order(
             session=session,
-            key_price=key_price,
-            tg_id=call.from_user.id,
+            order=order_schema,
         )
     await call.message.edit_text(
         text=f"""
-Ваш заказ:
+Ваш заказ был принят✅
 
+Информация о заказе:
 Страна - {data['country']}
-Цена - {price.price_view_text}
-Была успешна принята.
+Цена - {order.price.view_price}
+Срок - {order.price.term} {order.price.billing_period.value}
         """,
         reply_markup=back(back_text="🔙Назад", back_callback_data="back_to_start_menu"),
     )

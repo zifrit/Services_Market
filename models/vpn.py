@@ -25,7 +25,7 @@ class TypeVPN(enum.Enum):
 
 class UserVPNs(IdCUDMixin):
     __tablename__ = "user_vpn_s"
-    vpn_key: Mapped[str] = mapped_column(String(255))
+    vpn_key: Mapped[str] = mapped_column(String(255), unique=True)
     status: Mapped[StatusPN] = mapped_column(
         PGEnum(StatusPN, name="status_user_vpn"),
         comment="Состояние купленного впн",

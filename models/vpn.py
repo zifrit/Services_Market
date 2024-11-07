@@ -86,4 +86,4 @@ class Price(IdCUDMixin):
     country: Mapped["Country"] = relationship(back_populates="prices")
     orders: Mapped[list["Order"]] = relationship(back_populates="price")
 
-    repr_columns = ["id", "view_price", "quantity", ""]
+    repr_columns = ["id", "view_price"]

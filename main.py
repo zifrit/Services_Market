@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from sqladmin import Admin, ModelView
 
 from core.db_connections import db_helper
-from models.user import User
-from models.vpn import UserVPN, VPN, Price
+from models.user import TgUser
+from models.vpn import UserVPNs, Country, Price
 import uvicorn
 
 logging.basicConfig(level=logging.INFO)
@@ -17,29 +17,29 @@ app = FastAPI(
 admin = Admin(app, db_helper.engine)
 
 
-class UserAdmin(ModelView, model=User):
+class UserAdmin(ModelView, model=TgUser):
     name = "User"
     name_plural = "Users"
-    column_list = [User.tg_id, User.username]
-    column_details_list = [User.tg_id, User.username]
+    column_list = [TgUser.tg_id, TgUser.username]
+    column_details_list = [TgUser.tg_id, TgUser.username]
 
 
-class VPNAdmin(ModelView, model=UserVPN):
+class VPNAdmin(ModelView, model=UserVPNs):
     name = "UserVPN"
-    name_plural = "UserVPN"
-    column_list = [UserVPN.id, UserVPN.view]
+    name_plural = "UserVPNs"
+    column_list = [UserVPNs.id, UserVPNs.vpn_key, UserVPNs.type_VPN]
 
 
-class PriceAdmin(ModelView, model=VPN):
-    name = "VPN"
-    name_plural = "VPN"
-    column_list = [VPN.id, VPN.key_country, VPN.country_view_text]
+class PriceAdmin(ModelView, model=Country):
+    name = "Country"
+    name_plural = "Countries"
+    column_list = [Country.id, Country.key_country, Country.view_country]
 
 
 class UserVPNAdmin(ModelView, model=Price):
     name = "Price"
     name_plural = "Price"
-    column_list = [Price.id, Price.price, Price.price_view_text, Price.key_price]
+    column_list = [Price.id, Price.view_price, Price.price, Price.currency]
 
 
 admin.add_view(UserAdmin)

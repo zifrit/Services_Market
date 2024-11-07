@@ -11,18 +11,30 @@ if typing.TYPE_CHECKING:
     from models.order import Order
 
 
-class TypeVPN(enum.Enum):
+class StatusPN(enum.Enum):
     active = "active"
     inactive = "inactive"
 
 
-class VPNs(IdCUDMixin):
-    __tablename__ = "vpn_s"
+class TypeVPN(enum.Enum):
+    vmess = "vmess"
+    vless = "vless"
+    trojan = "trojan"
+    shadowsocks = "shadowsocks"
+
+
+class UserVPNs(IdCUDMixin):
+    __tablename__ = "user_vpn_s"
     vpn_key: Mapped[str] = mapped_column(String(255))
-    type_VPN: Mapped[TypeVPN] = mapped_column(
-        PGEnum(TypeVPN, name="status_user_vpn"),
+    status: Mapped[StatusPN] = mapped_column(
+        PGEnum(StatusPN, name="status_user_vpn"),
         comment="Состояние купленного впн",
     )
+    type_VPN: Mapped[TypeVPN] = mapped_column(
+        PGEnum(TypeVPN, name="type_user_vpn"),
+        comment="Тип впн",
+    )
+    vpn: Mapped[str] = mapped_column(String(255))
     expire: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("tg_users.id"))
     tg_user: Mapped["TgUser"] = relationship(back_populates="user_vpn_s")

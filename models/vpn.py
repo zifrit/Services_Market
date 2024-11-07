@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
     from models.order import Order
 
 
-class StatusPN(enum.Enum):
+class StatusVPN(enum.Enum):
     active = "active"
     inactive = "inactive"
 
@@ -26,8 +26,8 @@ class TypeVPN(enum.Enum):
 class UserVPNs(IdCUDMixin):
     __tablename__ = "user_vpn_s"
     vpn_key: Mapped[str] = mapped_column(String(255), unique=True)
-    status: Mapped[StatusPN] = mapped_column(
-        PGEnum(StatusPN, name="status_user_vpn"),
+    status: Mapped[StatusVPN] = mapped_column(
+        PGEnum(StatusVPN, name="status_user_vpn"),
         comment="Состояние купленного впн",
     )
     type_VPN: Mapped[TypeVPN] = mapped_column(

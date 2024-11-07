@@ -15,6 +15,7 @@ class CreateOrderSchema(BaseOrderSchema):
 
 
 class ShowOrderSchema(BaseOrderSchema):
+    id: int
     price: ShortShowPriceSchema
 
 

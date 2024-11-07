@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from buttons.start import back
+from buttons.start import back, move_to
 from core.db_connections import db_helper
 import logging
 from buttons.buy_vpn import (
@@ -75,7 +75,7 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data.startswith("tariff-"))
-async def choice_county(call: CallbackQuery, state: FSMContext):
+async def choice_price_county(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     key_price = call.data
     async with db_helper.session_factory() as session:
@@ -88,6 +88,9 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
             session=session,
             order=order_schema,
         )
+        payment_id = await order_crud.create_payment(
+            session=session, price_id=price_id, order_id=order.id
+        )
     await call.message.edit_text(
         text=f"""
 Ваш заказ был принят✅
@@ -97,5 +100,18 @@ async def choice_county(call: CallbackQuery, state: FSMContext):
 Цена - {order.price.view_price}
 Срок - {order.price.term} {order.price.billing_period.value}
         """,
+        reply_markup=move_to(
+            back_text="Оплатить", back_callback_data=f"payment-{payment_id}"
+        ),
+    )
+
+
+@router.callback_query(F.data.startswith("payment-"))
+async def payment_receipt(call: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    await state.clear()
+    await call.message.edit_text(
+        text="Тут будет чек",
         reply_markup=back(back_text="🔙Назад", back_callback_data="back_to_start_menu"),
     )
+    # todo в месте с чеком потом должен будет создавать и впн в marzban и выдаваться отдельным смс в тг

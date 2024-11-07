@@ -10,7 +10,6 @@ from schematics.vpn import (
 )
 
 
-
 async def create_vpn_s(session: AsyncSession, user_vpn: CreateUserVPNsSchema) -> None:
     vpn = UserVPNs(**user_vpn.model_dump())
     session.add(vpn)
@@ -41,4 +40,9 @@ async def get_vpn_country_price(
 
 async def get_price_id_by_price_key(session: AsyncSession, price_key: str) -> int:
     price = await session.scalar(select(Price.id).where(Price.price_key == price_key))
+    return price
+
+
+async def get_price(session: AsyncSession, _id: int) -> Price:
+    price = await session.scalar(select(Price).where(Price.id == _id))
     return price

@@ -65,3 +65,14 @@ def back(back_text: str, back_callback_data: str):
         )
     )
     return builder.as_markup()
+
+
+def move_to(back_text: str, back_callback_data: str):
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text=back_text,
+            callback_data=back_callback_data,
+        )
+    )
+    return builder.as_markup()

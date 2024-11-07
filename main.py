@@ -5,6 +5,7 @@ from sqladmin import Admin, ModelView
 from core.db_connections import db_helper
 from models.user import TgUser
 from models.vpn import UserVPNs, Country, Price
+from models.order import Order, Payment
 import uvicorn
 
 logging.basicConfig(level=logging.INFO)
@@ -42,10 +43,24 @@ class UserVPNAdmin(ModelView, model=Price):
     column_list = [Price.id, Price.view_price, Price.price, Price.currency]
 
 
+class OrdersAdmin(ModelView, model=Order):
+    name = "Order"
+    name_plural = "Orders"
+    column_list = [Order.id, Order.status, Order.price]
+
+
+class PaymentsAdmin(ModelView, model=Payment):
+    name = "Payment"
+    name_plural = "Payments"
+    column_list = [Payment.id, Payment.status, Payment.amount]
+
+
 admin.add_view(UserAdmin)
 admin.add_view(VPNAdmin)
 admin.add_view(PriceAdmin)
 admin.add_view(UserVPNAdmin)
+admin.add_view(OrdersAdmin)
+admin.add_view(PaymentsAdmin)
 
 
 if __name__ == "__main__":

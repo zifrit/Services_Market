@@ -14,7 +14,9 @@ from sqlalchemy.dialects import postgresql
 
 
 payment_currency = postgresql.ENUM("dollars", "euro", "ruble", name="payment_currency")
-payment_status = postgresql.ENUM("dollars", "euro", "ruble", name="payment_status")
+payment_status = postgresql.ENUM(
+    "completed", "failed", "in_progress", name="payment_status"
+)
 
 # revision identifiers, used by Alembic.
 revision: str = "40dbc7ed1ae7"

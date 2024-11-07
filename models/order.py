@@ -20,7 +20,7 @@ class Order(IdCUDMixin):
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("tg_users.id"))
     tg_user: Mapped["TgUser"] = relationship(back_populates="orders")
     status: Mapped[bool] = mapped_column(comment="Статус заказа")
-    payments: Mapped["Payment"] = relationship(back_populates="order")
+    payments: Mapped[list["Payment"]] = relationship(back_populates="order")
 
     repr_columns = ["id", "status"]
 
@@ -39,7 +39,7 @@ class Payment(IdCUDMixin):
         comment="Валюта",
     )
     status: Mapped[PaymentsStatus] = mapped_column(
-        PGEnum(Currency, name="payment_status"),
+        PGEnum(PaymentsStatus, name="payment_status"),
         comment="Статус платежа",
     )
     amount: Mapped[int] = mapped_column(comment="Сумма")
